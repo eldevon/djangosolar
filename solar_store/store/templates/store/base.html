@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+    mobileMenuOpen: false, 
+    cartOpen: false,
+    searchOpen: false,
+    userMenuOpen: false,
+    toastMessages: [],
+    addToast(message, type = 'success') {
+        const id = Date.now();
+        this.toastMessages.push({ id, message, type });
+        setTimeout(() => {
+            this.toastMessages = this.toastMessages.filter(toast => toast.id !== id);
+        }, 5000);
+    }
+}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Solar Panel Store | Clean Energy Solutions{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'solar-blue': '#0ea5e9',
+                        'solar-green': '#10b981',
+                        'solar-yellow': '#f59e0b',
+                        'solar-gray': {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        'primary': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'fade-out': 'fadeOut 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'slide-in-right': 'slideInRight 0.3s ease-out',
+                        'slide-out-right': 'slideOutRight 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.5s ease-out',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        fadeOut: {
+                            '0%': { opacity: '1' },
+                            '100%': { opacity: '0' }
+                        },
+                        slideUp: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'translateY(20px)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            }
+                        },
+                        slideDown: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'translateY(-20px)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            }
+                        },
+                        slideInRight: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'translateX(100%)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'translateX(0)'
+                            }
+                        },
+                        slideOutRight: {
+                            '0%': { 
+                                opacity: '1',
+                                transform: 'translateX(0)'
+                            },
+                            '100%': { 
+                                opacity: '0',
+                                transform: 'translateX(100%)'
+                            }
+                        },
+                        bounceIn: {
+                            '0%': { 
+                                opacity: '0',
+                                transform: 'scale(0.3)'
+                            },
+                            '50%': { 
+                                opacity: '1',
+                                transform: 'scale(1.05)'
+                            },
+                            '70%': { 
+                                transform: 'scale(0.9)'
+                            },
+                            '100%': { 
+                                opacity: '1',
+                                transform: 'scale(1)'
+                            }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { 
+                                boxShadow: '0 0 5px rgba(14, 165, 233, 0.5)'
+                            },
+                            '50%': { 
+                                boxShadow: '0 0 20px rgba(14, 165, 233, 0.8)'
+                            }
+                        },
+                        float: {
+                            '0%, 100%': { 
+                                transform: 'translateY(0)'
+                            },
+                            '50%': { 
+                                transform: 'translateY(-10px)'
+                            }
+                        },
+                        shimmer: {
+                            '0%': { 
+                                backgroundPosition: '-1000px 0'
+                            },
+                            '100%': { 
+                                backgroundPosition: '1000px 0'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.13.0/dist/cdn.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Smooth Transitions */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+        
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Button Animations */
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+        }
+        
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-primary:hover::after {
+            left: 100%;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .toast.exit {
+            animation: slideOutRight 0.3s ease-out forwards;
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #0ea5e9;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Shimmer Effect */
+        .shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.3) 50%, 
+                rgba(255,255,255,0) 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Solar Panel Pattern */
+        .solar-pattern {
+            background-image: 
+                linear-gradient(45deg, rgba(14, 165, 233, 0.1) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(14, 165, 233, 0.1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(14, 165, 233, 0.1) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(14, 165, 233, 0.1) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        /* Responsive Typography */
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-solar-gray-50">
+    <!-- Toast Notifications Container -->
+    <div class="fixed top-4 right-4 z-50 space-y-2 w-80 md:w-96" x-data>
+        <template x-for="toast in toastMessages" :key="toast.id">
+            <div 
+                class="toast p-4 rounded-lg shadow-lg flex items-center justify-between"
+                :class="{
+                    'bg-green-50 border border-green-200 text-green-800': toast.type === 'success',
+                    'bg-red-50 border border-red-200 text-red-800': toast.type === 'error',
+                    'bg-yellow-50 border border-yellow-200 text-yellow-800': toast.type === 'warning',
+                    'bg-blue-50 border border-blue-200 text-blue-800': toast.type === 'info'
+                }"
+                x-init="setTimeout(() => $el.classList.add('exit'), 4500)"
+                @click="$el.remove()"
+            >
+                <div class="flex items-center space-x-3">
+                    <i 
+                        class="fas text-lg"
+                        :class="{
+                            'fa-check-circle text-green-500': toast.type === 'success',
+                            'fa-exclamation-circle text-red-500': toast.type === 'error',
+                            'fa-exclamation-triangle text-yellow-500': toast.type === 'warning',
+                            'fa-info-circle text-blue-500': toast.type === 'info'
+                        }"
+                    ></i>
+                    <span x-text="toast.message" class="font-medium"></span>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-br from-solar-blue to-solar-green rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sun text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">SolarStore</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-solar-gray-700 hover:text-solar-blue font-medium transition-colors">Home</a>
+                    <a href="/products" class="text-solar-gray-700 hover:text-solar-blue font-medium transition-colors">Products</a>
+                    <a href="/solutions" class="text-solar-gray-700 hover:text-solar-blue font-medium transition-colors">Solutions</a>
+                    <a href="/about" class="text-solar-gray-700 hover:text-solar-blue font-medium transition-colors">About</a>
+                    <a href="/contact" class="text-solar-gray-700 hover:text-solar-blue font-medium transition-colors">Contact</a>
+                </div>
+
+                <!-- Right Side Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Search Button -->
+                    <button @click="searchOpen = !searchOpen" class="p-2 rounded-full hover:bg-solar-gray-100 transition-colors">
+                        <i class="fas fa-search text-solar-gray-600"></i>
+                    </button>
+
+                    <!-- Cart Button -->
+                    <button @click="cartOpen = !cartOpen" class="p-2 rounded-full hover:bg-solar-gray-100 transition-colors relative">
+                        <i class="fas fa-shopping-cart text-solar-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 bg-solar-blue text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </button>
+
+                    <!-- User Menu -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-solar-gray-100 transition-colors">
+                            <div class="w-8 h-8 bg-solar-blue rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <span class="hidden md:inline text-solar-gray-700 font-medium">Account</span>
+                            <i class="fas fa-chevron-down text-solar-gray-400 text-sm"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" @click.outside="open = false" 
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 transform scale-100"
+                             x-transition:leave-end="opacity-0 transform scale-95">
+                            <a href="/account" class="block px-4 py-2 text-solar-gray-700 hover:bg-solar-gray-50">My Account</a>
+                            <a href="/orders" class="block px-4 py-2 text-solar-gray-700 hover:bg-solar-gray-50">My Orders</a>
+                            <a href="/wishlist" class="block px-4 py-2 text-solar-gray-700 hover:bg-solar-gray-50">Wishlist</a>
+                            <div class="border-t my-2"></div>
+                            <a href="/logout" class="block px-4 py-2 text-red-600 hover:bg-red-50">Logout</a>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-lg hover:bg-solar-gray-100 transition-colors">
+                        <i class="fas fa-bars text-solar-gray-600 text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false"
+             class="md:hidden bg-white border-t"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-4">
+            <div class="px-4 py-3 space-y-2">
+                <a href="/" class="block py-2 text-solar-gray-700 hover:text-solar-blue font-medium">Home</a>
+                <a href="/products" class="block py-2 text-solar-gray-700 hover:text-solar-blue font-medium">Products</a>
+                <a href="/solutions" class="block py-2 text-solar-gray-700 hover:text-solar-blue font-medium">Solutions</a>
+                <a href="/about" class="block py-2 text-solar-gray-700 hover:text-solar-blue font-medium">About</a>
+                <a href="/contact" class="block py-2 text-solar-gray-700 hover:text-solar-blue font-medium">Contact</a>
+            </div>
+        </div>
+
+        <!-- Search Overlay -->
+        <div x-show="searchOpen" @click.outside="searchOpen = false"
+             class="absolute top-full left-0 right-0 bg-white shadow-lg z-50"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-4">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="relative">
+                    <input type="text" 
+                           placeholder="Search for solar panels, inverters, accessories..."
+                           class="w-full px-4 py-3 pl-12 border border-solar-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-solar-blue focus:border-transparent"
+                           autofocus>
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-solar-gray-400"></i>
+                    <button @click="searchOpen = false" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-solar-gray-400 hover:text-solar-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Sidebar -->
+    <div x-show="cartOpen" @click.outside="cartOpen = false"
+         class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-xl z-50"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-x-full"
+         x-transition:enter-end="opacity-100 transform translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-x-0"
+         x-transition:leave-end="opacity-0 transform translate-x-full">
+        <div class="h-full flex flex-col">
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between p-6 border-b">
+                <h2 class="text-xl font-bold text-solar-gray-900">Shopping Cart</h2>
+                <button @click="cartOpen = false" class="text-solar-gray-400 hover:text-solar-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="space-y-4">
+                    <!-- Cart Item -->
+                    <div class="flex items-center space-x-4 p-4 bg-solar-gray-50 rounded-lg">
+                        <img src="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=100&h=100&fit=crop" 
+                             alt="Solar Panel" 
+                             class="w-20 h-20 object-cover rounded">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-solar-gray-900">Premium Solar Panel 400W</h3>
+                            <p class="text-sm text-solar-gray-600">High-efficiency monocrystalline</p>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="font-bold text-solar-blue">$299.99</span>
+                                <div class="flex items-center space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center border border-solar-gray-300 rounded hover:bg-solar-gray-100">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="font-medium">1</span>
+                                    <button class="w-8 h-8 flex items-center justify-center border border-solar-gray-300 rounded hover:bg-solar-gray-100">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="border-t p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-solar-gray-600">Subtotal</span>
+                    <span class="text-xl font-bold text-solar-gray-900">$899.97</span>
+                </div>
+                <button class="w-full py-3 bg-solar-blue text-white font-medium rounded-lg hover:bg-solar-blue/90 transition-colors">
+                    Checkout
+                </button>
+                <button @click="cartOpen = false" class="w-full py-3 mt-2 border border-solar-gray-300 text-solar-gray-700 font-medium rounded-lg hover:bg-solar-gray-50 transition-colors">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}
+        <!-- Content will be inserted here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-solar-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-solar-blue to-solar-green rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sun text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold">SolarStore</span>
+                    </div>
+                    <p class="text-solar-gray-400 mb-4">
+                        Your trusted partner for clean energy solutions. Powering a sustainable future.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-solar-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-solar-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-solar-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-solar-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/products" class="text-solar-gray-400 hover:text-white transition-colors">Products</a></li>
+                        <li><a href="/solutions" class="text-solar-gray-400 hover:text-white transition-colors">Solutions</a></li>
+                        <li><a href="/installation" class="text-solar-gray-400 hover:text-white transition-colors">Installation</a></li>
+                        <li><a href="/support" class="text-solar-gray-400 hover:text-white transition-colors">Support</a></li>
+                        <li><a href="/blog" class="text-solar-gray-400 hover:text-white transition-colors">Blog</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/contact" class="text-solar-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="/faq" class="text-solar-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="/shipping" class="text-solar-gray-400 hover:text-white transition-colors">Shipping Policy</a></li>
+                        <li><a href="/returns" class="text-solar-gray-400 hover:text-white transition-colors">Returns & Warranty</a></li>
+                        <li><a href="/privacy" class="text-solar-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Stay Updated</h3>
+                    <p class="text-solar-gray-400 mb-4">
+                        Subscribe to our newsletter for the latest in solar technology.
+                    </p>
+                    <form class="space-y-2">
+                        <input type="email" 
+                               placeholder="Your email address"
+                               class="w-full px-4 py-2 bg-solar-gray-800 border border-solar-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-solar-blue focus:border-transparent">
+                        <button type="submit" class="w-full py-2 bg-solar-blue text-white font-medium rounded-lg hover:bg-solar-blue/90 transition-colors">
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-solar-gray-800 mt-8 pt-8 text-center text-solar-gray-400">
+                <p>&copy; 2024 SolarStore. All rights reserved. Powering a greener tomorrow.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+            class="fixed bottom-6 right-6 w-12 h-12 bg-solar-blue text-white rounded-full shadow-lg hover:bg-solar-blue/90 transition-colors flex items-center justify-center">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Initialize Alpine.js components
+        document.addEventListener('alpine:init', () => {
+            // Example: Add to cart function
+            Alpine.data('product', () => ({
+                quantity: 1,
+                addToCart() {
+                    // Add product to cart logic
+                    this.$dispatch('add-to-cart', {
+                        productId: this.productId,
+                        quantity: this.quantity
+                    });
+                    
+                    // Show success toast
+                    this.$store.app.addToast('Added to cart successfully!', 'success');
+                    
+                    // Open cart sidebar
+                    this.$store.app.cartOpen = true;
+                }
+            }));
+        });
+
+        // Example: Add to cart event listener
+        document.addEventListener('add-to-cart', (event) => {
+            console.log('Product added to cart:', event.detail);
+            // Here you would typically send this data to your backend
+        });
+
+        // Example: Search functionality
+        document.addEventListener('keydown', (event) => {
+            // Ctrl+K for search
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                Alpine.store('app').searchOpen = true;
+            }
+        });
+
+        // Example: Initialize tooltips
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize any third-party libraries here
+        });
+    </script>
+</body>
+</html>
